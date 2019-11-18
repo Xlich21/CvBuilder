@@ -1,0 +1,8 @@
+hover.hover {
+    color: red;
+    text-decoration: none;
+}
+
+hover.hover:hover {
+    text-decoration: underline;
+}
