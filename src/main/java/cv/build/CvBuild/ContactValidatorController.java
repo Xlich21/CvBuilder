@@ -7,8 +7,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.validation.Valid;
@@ -32,25 +30,45 @@ public class ContactValidatorController  {
     @Autowired
     ContactFormRepository contactFormRepository;
 
+    @Autowired
+    private MailService mailService;
 
     @PostMapping(value = "savecontact-action")
     public String addContact (@ModelAttribute @Valid ContactForm contactForm, BindingResult bindingResult, Model model,
                                                          @RequestParam("name") String name,
                                                          @RequestParam("email") String email,
                                                          @RequestParam("subject") String subject,
-                                                         @RequestParam("message") String message){
+                                                         @RequestParam("message") String message) throws Exception {
+
+
+//        MimeMessage mimeMessage = sender.createMimeMessage();
+//        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+
+
+
         if (bindingResult.hasErrors()){
             System.out.println("Binding result has errors");
             return "contact";
         } else {
+
+            try {
+                String content = "Name: " + contactForm.getName();
+                content += "<br>Email: " + contactForm.getEmail();
+                content += "<br>Message: " + contactForm.getMessage();
+                mailService.send(contactForm.getEmail(), "alex.fenichiu@gmail.com", contactForm.getSubject(), content);
+            } catch (Exception e){
+                e.printStackTrace();
+                return "Error Message";
+            }
+
             contactForm.setName(name);
-        contactForm.setEmail(email);
-        contactForm.setSubject(subject);
-        contactForm.setMessage(message);
-        contactFormRepository.save(contactForm);
-        List<ContactForm> contactFormList = contactFormRepository.findAll();
-        model.addAttribute("contact_form", contactFormList);
-        model.addAttribute("contactForm", contactForm);
+            contactForm.setEmail(email);
+            contactForm.setSubject(subject);
+            contactForm.setMessage(message);
+            contactFormRepository.save(contactForm);
+            List<ContactForm> contactFormList = contactFormRepository.findAll();
+            model.addAttribute("contact_form", contactFormList);
+            model.addAttribute("contactForm", contactForm);
 
 
         }
@@ -63,28 +81,6 @@ public class ContactValidatorController  {
         return "savecontact";
     }
 
-
-//    @PostMapping("savecontact-action")
-//    public String addContact                   (Model model,
-//                                                @RequestParam("name") String name,
-//                                                @RequestParam("email") String email,
-//                                                @RequestParam("subject") String subject,
-//                                                @RequestParam("message") String message
-//    ) {
-//
-//        ContactForm contactForm = new ContactForm();
-//        contactForm.setName(name);
-//        contactForm.setEmail(email);
-//        contactForm.setSubject(subject);
-//        contactForm.setMessage(message);
-//        contactFormRepository.save(contactForm);
-//        List<ContactForm> contactFormList = contactFormRepository.findAll();
-//        model.addAttribute("contact_form", contactFormList);
-//
-//
-//        return "savecontact";
-//    }
-
     @GetMapping("contact")
     public String viewTheForm( Model model){
         ContactForm contactForm = new ContactForm();
@@ -96,8 +92,6 @@ public class ContactValidatorController  {
 
         return "contact";
     }
-
-
 
     public String checkNullString(String str) {
         String endString = null;
@@ -114,12 +108,5 @@ public class ContactValidatorController  {
 
         return endString;
     }
-//    @GetMapping("savecontact-action")
-//    public ModelAndView contact() {
-//
-//
-//
-//        return modelAndView;
-//    }
 }
 
