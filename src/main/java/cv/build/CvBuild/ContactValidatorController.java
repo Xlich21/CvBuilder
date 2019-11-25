@@ -41,10 +41,6 @@ public class ContactValidatorController  {
                                                          @RequestParam("message") String message) throws Exception {
 
 
-//        MimeMessage mimeMessage = sender.createMimeMessage();
-//        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-
-
 
         if (bindingResult.hasErrors()){
             System.out.println("Binding result has errors");
@@ -52,9 +48,12 @@ public class ContactValidatorController  {
         } else {
 
             try {
-                String content = "Name: " + contactForm.getName();
-                content += "<br>Email: " + contactForm.getEmail();
-                content += "<br>Message: " + contactForm.getMessage();
+                 try {
+                String contentName = "Name: " + contactForm.getName();
+                String contentEmail = "Email: " + contactForm.getEmail();
+                String contentSubject = "Subject: " + contactForm.getSubject();
+                String contentMessage = "Message: " + contactForm.getMessage();
+                String content = contentName + "\n" + contentEmail + "\n" +contentSubject + "\n" + contentMessage;
                 mailService.send(contactForm.getEmail(), "alex.fenichiu@gmail.com", contactForm.getSubject(), content);
             } catch (Exception e){
                 e.printStackTrace();
